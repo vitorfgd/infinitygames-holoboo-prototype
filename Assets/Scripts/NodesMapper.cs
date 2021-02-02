@@ -1,12 +1,18 @@
 ﻿using System.Collections.Generic;
 using Models;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 public class NodesMapper : MonoBehaviour
 {
     public Dictionary<Vector2, Node> Nodes { get; } = new Dictionary<Vector2, Node>();
+    public UnityEvent ConstructionFinished = new UnityEvent();
 
-    [Header("Prefab References")]
+    [Header("References")]
+    [SerializeField]
+    private Transform _container;
+
     [SerializeField]
     private GameObject _row;
 
@@ -19,12 +25,7 @@ public class NodesMapper : MonoBehaviour
     [SerializeField]
     private Node _connection;
 
-    [Header("Settings")]
-    [SerializeField]
-    private Vector2 _size;
-
-    [SerializeField]
-    private int _connectors;
+    private Map _map;
 
     private readonly List<Vector2> _batteryPositions = new List<Vector2>();
     private readonly List<Vector2> _connectorPositions = new List<Vector2>();
@@ -37,28 +38,14 @@ public class NodesMapper : MonoBehaviour
         Vector2.left
     };
 
-    private void Awake()
+    public void Create(Map map)
     {
-        _batteryPositions.Add(RandomVector());
-        for (var i = 0; i < _connectors; i++)
-        {
-            var position = RandomVector();
-            foreach (var batteryPosition in _batteryPositions)
-            {
-                while (!IsDistant(position, batteryPosition)
-                    || _connectorPositions.Contains(position))
-                {
-                    position = RandomVector();
-                }
-            }
-
-            _connectorPositions.Add(position);
-        }
-
-        for (var r = 0; r < _size.x; r++)
+        _map = map;
+        DefinePositions();
+        for (var r = 0; r < _map.Size.x; r++)
         {
             var row = Instantiate(_row, transform);
-            for (var c = 0; c < _size.y; c++)
+            for (var c = 0; c < _map.Size.y; c++)
             {
                 Node instance = null;
                 var position = new Vector2(r, c);
@@ -79,23 +66,58 @@ public class NodesMapper : MonoBehaviour
                 }
 
                 Nodes[position] = instance;
-                foreach (var candidate in _connectionCandidate)
-                {
-                    var reference = new Vector2(position.x + candidate.x, position.y + candidate.y);
-                    if (!Nodes.TryGetValue(reference, out var node))
-                    {
-                        continue;
-                    }
+                DefineSiblings(position, instance);
+            }
+        }
 
-                    var key = candidate * -1;
-                    node.Connections[key] = instance;
-                    instance.Connections[candidate] = node;
+        ConstructionFinished?.Invoke();
+    }
+
+    public void Destroy()
+    {
+        foreach (Transform child in _container)
+        {
+            Destroy(child);
+        }
+    }
+
+    private void DefinePositions()
+    {
+        _batteryPositions.Add(RandomVector());
+        for (var i = 0; i < _map.Connectors; i++)
+        {
+            var position = RandomVector();
+            foreach (var batteryPosition in _batteryPositions)
+            {
+                while (!IsDistant(position, batteryPosition)
+                    || _connectorPositions.Contains(position))
+                {
+                    position = RandomVector();
                 }
             }
+
+            _connectorPositions.Add(position);
+        }
+    }
+
+    private void DefineSiblings(Vector2 position, Node instance)
+    {
+        foreach (var candidate in _connectionCandidate)
+        {
+            var reference = new Vector2(position.x + candidate.x, position.y + candidate.y);
+            if (!Nodes.TryGetValue(reference, out var node))
+            {
+                continue;
+            }
+
+            var key = candidate * -1;
+            node.Connections[key] = instance;
+            instance.Connections[candidate] = node;
         }
     }
 
     private static bool IsDistant(Vector2 reference, Vector2 target) => !(Vector3.Distance(reference, target) <= 1);
 
-    private Vector2 RandomVector() => new Vector2(Random.Range(0, (int) _size.x), Random.Range(0, (int) _size.y));
+    private Vector2 RandomVector() =>
+        new Vector2(Random.Range(0, (int) _map.Size.x), Random.Range(0, (int) _map.Size.y));
 }

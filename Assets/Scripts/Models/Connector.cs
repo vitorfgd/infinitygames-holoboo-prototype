@@ -1,10 +1,12 @@
-﻿using UnityEngine.Events;
+﻿using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Models
 {
     public class Connector : Node
     {
-        public UnityEvent Connected = new UnityEvent();
+        public UnityEvent ConnectorWasConnected = new UnityEvent();
 
         protected override void Awake()
         {
@@ -14,10 +16,13 @@ namespace Models
         public override void Connect()
         {
             base.Connect();
-            if (ConnectedToBattery)
+            if (!Connected
+                || !ConnectedToBattery)
             {
-                Connected?.Invoke();
+                return;
             }
+
+            ConnectorWasConnected?.Invoke();
         }
     }
 }

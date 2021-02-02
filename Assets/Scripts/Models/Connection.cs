@@ -12,9 +12,16 @@ namespace Models
         public override void Connect()
         {
             base.Connect();
+
+            if (!Connected
+                || !ConnectedToBattery)
+            {
+                return;
+            }
+
             var image = GetComponent<Image>();
             image.sprite = _connection;
-            image.color = new Color(255, 255, 255, 128);
+            image.color = new Color(255, 255, 255, 128f);
         }
     }
 }

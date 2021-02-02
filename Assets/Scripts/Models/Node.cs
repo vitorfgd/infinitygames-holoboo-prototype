@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
 
 namespace Models
 {
@@ -11,8 +8,10 @@ namespace Models
     public class Node : MonoBehaviour
     {
         public readonly Dictionary<Vector2, Node> Connections = new Dictionary<Vector2, Node>();
-        private bool Connected { get; set; }
+
         public bool ConnectedToBattery { get; protected set; }
+
+        protected bool Connected { get; private set; }
 
         private RectTransform _transform;
 
@@ -24,20 +23,16 @@ namespace Models
 
         public virtual void Connect()
         {
-            Connected = true;
-
             var connections = Connections.Where(connection => connection.Value.Connected)
                 .Aggregate(Vector2.zero, (current, connection) => current + connection.Key);
 
-            if (!(connections.magnitude >= 1))
+            if (!Connections.Values.Any(node => node.ConnectedToBattery))
             {
                 return;
             }
 
-            if (Connected || Connections.Values.Any(node => node.ConnectedToBattery))
-            {
-                ConnectedToBattery = true;
-            }
+            Connected = true;
+            ConnectedToBattery = true;
         }
     }
 }

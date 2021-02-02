@@ -11,26 +11,11 @@ public class ConnectionController : MonoBehaviour
     [SerializeField]
     private NodesMapper _mapper;
 
-    private List<Node> _connectors;
+    private readonly List<Node> _connectors = new List<Node>();
 
     private void Awake()
     {
         _dragger.PositionChanged.AddListener(Intersect);
-        foreach (var node in _mapper.Nodes.Where(node => node.Value is Connector))
-        {
-            var connector = (Connector) node.Value;
-            _connectors.Add(connector);
-            connector.Connected.AddListener(EvaluateGame);
-        }
-        
-    }
-
-    private void EvaluateGame()
-    {
-        if (_connectors.All(node => node.ConnectedToBattery))
-        {
-            Debug.Log("Game ended");
-        }
     }
 
     private void Intersect(Vector2 position)
