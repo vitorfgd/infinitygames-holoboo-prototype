@@ -2,11 +2,12 @@
 using Models;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 public class NodesMapper : MonoBehaviour
 {
     public Dictionary<Vector2, Node> Nodes { get; } = new Dictionary<Vector2, Node>();
+
+    [HideInInspector]
     public UnityEvent ConstructionFinished = new UnityEvent();
 
     [Header("References")]
@@ -44,7 +45,7 @@ public class NodesMapper : MonoBehaviour
         DefinePositions();
         for (var r = 0; r < _map.Size.x; r++)
         {
-            var row = Instantiate(_row, transform);
+            var row = Instantiate(_row, _container.transform);
             for (var c = 0; c < _map.Size.y; c++)
             {
                 Node instance = null;
@@ -77,8 +78,18 @@ public class NodesMapper : MonoBehaviour
     {
         foreach (Transform child in _container)
         {
-            Destroy(child);
+            Destroy(child.gameObject);
         }
+
+        _batteryPositions.Clear();
+        _connectorPositions.Clear();
+
+        foreach (var node in Nodes.Values)
+        {
+            Destroy(node.gameObject);
+        }
+
+        Nodes.Clear();
     }
 
     private void DefinePositions()

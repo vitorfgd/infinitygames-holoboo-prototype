@@ -88,6 +88,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca2727b742df4e81888d9089d30c872d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Connected:
+  _connectionSound: {fileID: 8300000, guid: 58ffc6dbb4dddf948be4fd81c47ed4ce, type: 3}
+  ConnectorWasConnected:
     m_PersistentCalls:
       m_Calls: []

@@ -9,18 +9,26 @@ public class TrackerChanged : UnityEvent<Vector2>
 
 public class Dragger : MonoBehaviour
 {
+    [HideInInspector]
+    public UnityEvent Pressed = new UnityEvent();
+
+    [HideInInspector]
     public TrackerChanged PositionChanged = new TrackerChanged();
 
-    private Vector2 _mousePositions;
+    private bool _canPress;
 
     private void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Pressed?.Invoke();
+        }
+
         if (!Input.GetMouseButton(0))
         {
             return;
         }
 
-        var mousePosition = Input.mousePosition;
-        PositionChanged?.Invoke(mousePosition);
+        PositionChanged?.Invoke(Input.mousePosition);
     }
 }

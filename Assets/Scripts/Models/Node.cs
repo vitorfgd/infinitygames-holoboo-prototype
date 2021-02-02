@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
+using Sounds;
 using UnityEngine;
 
 namespace Models
@@ -12,6 +14,10 @@ namespace Models
         public bool ConnectedToBattery { get; protected set; }
 
         protected bool Connected { get; private set; }
+
+        [CanBeNull]
+        [SerializeField]
+        private AudioClip _connectionSound;
 
         private RectTransform _transform;
 
@@ -29,6 +35,11 @@ namespace Models
             if (!Connections.Values.Any(node => node.ConnectedToBattery))
             {
                 return;
+            }
+
+            if (_connectionSound != null)
+            {
+                SoundsManager.Instance.Play(_connectionSound);
             }
 
             Connected = true;
