@@ -46,10 +46,15 @@ Please make sure to update tests as appropriate.
 
 ## Créditos
 Icons made by https://www.flaticon.com/authors/pixel-perfect from https://www.flaticon.com/
+
 Icons made by https://www.flaticon.com/authors/fjstudio from https://www.flaticon.com/
+
 Icons made by https://www.flaticon.com/authors/roundicons from https://www.flaticon.com/
+
 Music by https://opengameart.org/content/soliloquy
+
 Sound effects by https://opengameart.org/content/sound-effects-pack
+
 Sound effects by https://freesound.org/people/Eponn/sounds/531511/
 
 ## Licensa
