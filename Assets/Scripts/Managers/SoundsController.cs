@@ -1,13 +1,11 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.Serialization;
 
-namespace Sounds
+namespace Managers
 {
-    public class SoundsManager : MonoBehaviour
+    public class SoundsController : MonoBehaviour
     {
-        public static SoundsManager Instance = null;
+        public static SoundsController Instance = null;
 
         [Header("Master")]
         [SerializeField]

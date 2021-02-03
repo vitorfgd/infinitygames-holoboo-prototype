@@ -1,17 +1,16 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 namespace Models
 {
+    [RequireComponent(typeof(Image))]
     public class Connector : Node
     {
         public UnityEvent ConnectorWasConnected = new UnityEvent();
 
-        protected override void Awake()
-        {
-            base.Awake();
-        }
+        [SerializeField]
+        private Color _colorWhenConnected;
 
         public override void Connect()
         {
@@ -22,6 +21,7 @@ namespace Models
                 return;
             }
 
+            GetComponent<Image>().color = _colorWhenConnected;
             ConnectorWasConnected?.Invoke();
         }
     }

@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
-using Sounds;
+using Managers;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Models
 {
@@ -10,6 +11,7 @@ namespace Models
     public class Node : MonoBehaviour
     {
         public readonly Dictionary<Vector2, Node> Connections = new Dictionary<Vector2, Node>();
+        public Image View => _view;
 
         public bool ConnectedToBattery { get; protected set; }
 
@@ -20,8 +22,13 @@ namespace Models
         private AudioClip _connectionSound;
 
         private RectTransform _transform;
+        private Image _view;
 
-        protected virtual void Awake() => _transform = GetComponent<RectTransform>();
+        protected virtual void Awake()
+        {
+            _transform = GetComponent<RectTransform>();
+            _view = GetComponent<Image>();
+        }
 
         public Vector2 Size() => _transform.rect.size;
 
@@ -39,7 +46,7 @@ namespace Models
 
             if (_connectionSound != null)
             {
-                SoundsManager.Instance.Play(_connectionSound);
+                SoundsController.Instance.Play(_connectionSound);
             }
 
             Connected = true;

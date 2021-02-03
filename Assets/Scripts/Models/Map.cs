@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Models
 {
@@ -7,5 +8,11 @@ namespace Models
     {
         public Vector2 Size;
         public int Connectors;
-    }   
+        public List<Node> Nodes;
+        
+        public void Save(Node node)
+        {
+            Nodes.Add(node);
+        }
+    }
 }

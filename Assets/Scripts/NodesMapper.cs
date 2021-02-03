@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DG.Tweening;
 using Models;
 using UnityEngine;
 using UnityEngine.Events;
@@ -66,6 +67,7 @@ public class NodesMapper : MonoBehaviour
                     instance = Instantiate(_connection, row.transform);
                 }
 
+                instance.View.DOFade(1f, .25f);
                 Nodes[position] = instance;
                 DefineSiblings(position, instance);
             }
