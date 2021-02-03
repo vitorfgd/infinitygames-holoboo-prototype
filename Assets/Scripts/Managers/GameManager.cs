@@ -48,6 +48,7 @@ namespace Managers
         [SerializeField]
         private AudioClip _successClip;
 
+        private bool _loading;
         private int _currentStage;
         private int _unlockedStages;
         private PersistenceHandler _persistenceHandler;
@@ -83,10 +84,14 @@ namespace Managers
                 _connectors.Add(connector);
                 connector.ConnectorWasConnected.AddListener(EvaluateGameStatus);
             }
+
+            _loading = false;
+            EvaluatePageButtonStatus();
         }
 
         private void ChangePage(int modifier)
         {
+            _loading = true;
             _currentStage += modifier;
             EvaluatePageButtonStatus();
             Next(_currentStage);
@@ -94,8 +99,16 @@ namespace Managers
 
         private void EvaluatePageButtonStatus()
         {
-            _previousButton.interactable = _currentStage != 0;
-            _nextButton.interactable = _currentStage < _maps.Length && _currentStage <= _unlockedStages;
+            var previousButtonStatus = _currentStage != 0;
+            var nextButtonStatus = _currentStage < _maps.Length && _currentStage < _unlockedStages;
+
+            if (_loading)
+            {
+                previousButtonStatus = nextButtonStatus = false;
+            }
+
+            _previousButton.interactable = previousButtonStatus;
+            _nextButton.interactable = nextButtonStatus;
         }
 
         private void EvaluateGameStatus()
@@ -117,14 +130,13 @@ namespace Managers
         /// Checks whether there are more stages to be played;
         /// End game or loads new stage depending on the result.
         /// </summary>
-        /// <param name="map"></param>
-        private async void Next(int map)
+        private async void Next(int map, bool destructionIsImmediate = false)
         {
             // Extension method that allows me to use an IEnumerator as an async.
             // Implemented using IEnumerator over Task.Delay because of previous problem regarding multiple threads on different platforms.
             await this.AsyncCoroutine(Utilities.Wait(1));
-            Destroy();
-            await _mapper.Destroy();
+            Clear();
+            await _mapper.DestroyNodes();
 
             if (_maps.Length == map)
             {
@@ -151,7 +163,7 @@ namespace Managers
             _mapper.Create(_maps[_currentStage]);
         }
 
-        private void Destroy()
+        private void Clear()
         {
             _connectors.Clear();
             _connectionsEvaluator.Reset();

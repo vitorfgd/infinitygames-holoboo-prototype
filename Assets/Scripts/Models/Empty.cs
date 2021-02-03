@@ -1,13 +1,11 @@
-﻿using UnityEngine;
-
-namespace Models
+﻿namespace Models
 {
     /// <summary>
     /// Designed to be blank space, used for creating different paths.
-    /// TODO: Implement "Empty" in NodeMapper map creation logic.
     /// </summary>
     public class Empty : Node
     {
+        // Empty node should never be connected to anything.
         public override void Connect()
         {
         }

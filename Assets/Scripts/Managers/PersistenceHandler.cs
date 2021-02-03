@@ -24,18 +24,10 @@ namespace Managers
 
         public string CurrentStagePersistenceKey => _currentStagePersistenceKey;
         public string UnlockedStagesPersistenceKey => _unlockedStagesPersistenceKey;
-
-        /// <summary>
-        /// Current map persistence key. Needed for PlayerPrefs get/set;
-        /// </summary>
-        /// <returns></returns>
+        
         [SerializeField]
         private string _currentStagePersistenceKey;
-
-        /// <summary>
-        /// Current map persistence key. Needed for PlayerPrefs get/set;
-        /// </summary>
-        /// <returns></returns>
+        
         [SerializeField]
         private string _unlockedStagesPersistenceKey;
 

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DG.Tweening;
 using Extensions;
-using Managers;
 using Models;
 using UnityEngine;
 using UnityEngine.Events;
@@ -11,7 +10,9 @@ using UnityEngine.Events;
 namespace Gameplay
 {
     /// <summary>
+    /// Creates the map using pre-defined rules and map settings defined in the scriptable object.
     /// TODO: Rewrite this class and remove any view in its separate class.
+    /// TODO: There are no positioning rules on empty node creation, this may result in an impossible route depending on the number of empty paths.
     /// </summary>
     public class NodesMapper : MonoBehaviour
     {
@@ -43,6 +44,8 @@ namespace Gameplay
         private Map _map;
         private readonly List<Vector2> _batteryPositions = new List<Vector2>();
         private readonly List<Vector2> _connectorPositions = new List<Vector2>();
+        private readonly List<Vector2> _emptyPositions = new List<Vector2>();
+        private readonly List<Vector2> _predefinedPositions = new List<Vector2>();
 
         private readonly Vector2[] _connectionCandidate =
         {
@@ -65,8 +68,9 @@ namespace Gameplay
                     var position = new Vector2(r, c);
 
                     var instance = InstantiateNode(position, row);
+                    
+                    // Every node starts with alpha 0 so it can fade in with the initial animation.
                     var color = instance.Icon.color;
-
                     color.a = 0f;
                     instance.Icon.color = color;
 
@@ -86,12 +90,9 @@ namespace Gameplay
         }
 
         /// <summary>
-        /// TODO: Include "Empty" node in map creation.
+        /// Once every special position is defined,
+        /// InstantiateNode creates its nodes and fill the rest with connections.
         /// </summary>
-        /// <param name="position"></param>
-        /// <param name="instance"></param>
-        /// <param name="row"></param>
-        /// <returns></returns>
         private Node InstantiateNode(Vector2 position, GameObject row)
         {
             Node instance;
@@ -99,15 +100,18 @@ namespace Gameplay
                 instance = Instantiate(_battery, row.transform);
             else if (_connectorPositions.Contains(position))
                 instance = Instantiate(_connector, row.transform);
+            else if (_emptyPositions.Contains(position))
+                instance = Instantiate(_empty, row.transform);
             else
                 instance = Instantiate(_connection, row.transform);
 
             return instance;
         }
 
-        public async Task Destroy()
+        public async Task DestroyNodes()
         {
-            // Destruction animation start
+            // Initially. only nodes that are NOT connected to a battery will fade.
+            // The resulting animation shows the path draw by the user;
             foreach (var node in Nodes.Values.Where(node => !node.ConnectedToBattery))
             {
                 await node.Icon
@@ -116,8 +120,8 @@ namespace Gameplay
             }
 
             await this.AsyncCoroutine(Utilities.Wait(1));
-            // Destruction animation end
-
+            
+            // Destroys the rest of the nodes.
             foreach (Transform child in _container)
             {
                 Destroy(child.gameObject);
@@ -125,6 +129,7 @@ namespace Gameplay
 
             _batteryPositions.Clear();
             _connectorPositions.Clear();
+            _emptyPositions.Clear();
 
             foreach (var node in Nodes.Values)
             {
@@ -134,9 +139,18 @@ namespace Gameplay
             Nodes.Clear();
         }
 
+        /// <summary>
+        /// Pre-define positions.
+        /// Battery is placed in a random position.
+        /// Connectors are placed randomly but ALWAYS one unit away from batteries.
+        /// Empty spaces are placed randomly.
+        /// This methods defines the guidelines for map creation.
+        /// </summary>
         private void DefinePositions()
         {
-            _batteryPositions.Add(RandomVector());
+            var batteryPredefinedPosition = RandomVector();
+            _batteryPositions.Add(batteryPredefinedPosition);
+            _predefinedPositions.Add(batteryPredefinedPosition);
             for (var i = 0; i < _map.Connectors; i++)
             {
                 var position = RandomVector();
@@ -150,6 +164,19 @@ namespace Gameplay
                 }
 
                 _connectorPositions.Add(position);
+                _predefinedPositions.Add(position);
+            }
+
+            for (var i = 0; i < _map.EmptySpaces; i++)
+            {
+                var position = RandomVector();
+                while (_predefinedPositions.Contains(position))
+                {
+                    position = RandomVector();
+                }
+
+                _emptyPositions.Add(position);
+                _predefinedPositions.Add(position);
             }
         }
 

@@ -30,6 +30,9 @@ namespace Models
 
         public Vector2 Coordinates() => transform.position;
 
+        // A node connection must always have its origin in a battery.
+        // Different nodes may have different sounds when connected.
+        // A node always pass 
         public virtual void Connect()
         {
             if (!Connections.Values.Any(node => node.ConnectedToBattery))

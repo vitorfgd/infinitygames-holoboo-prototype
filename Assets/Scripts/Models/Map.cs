@@ -8,11 +8,12 @@ namespace Models
     {
         public Vector2 Size;
         public int Connectors;
-        public List<Node> Nodes;
+        public int EmptySpaces;
+        public Queue<Node> Nodes;
         
+        // TODO: Save current map configuration. Save as a queue (respects position) use it to recreate a previously created level.
         public void Save(Node node)
         {
-            Nodes.Add(node);
         }
     }
 }
