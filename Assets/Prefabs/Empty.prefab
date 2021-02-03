@@ -86,9 +86,9 @@ GameObject:
   - component: {fileID: 876531637951701253}
   - component: {fileID: 876531637951701251}
   - component: {fileID: -6652945916307919104}
-  - component: {fileID: 3627076260703013384}
+  - component: {fileID: -1327970753156328647}
   m_Layer: 5
-  m_Name: Connection
+  m_Name: Empty
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: bf282fd94b9c71742ab35827b0d61d39, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4cfd989f9e8d10046a840f4edcd77dca, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -152,7 +152,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3627076260703013384
+--- !u!114 &-1327970753156328647
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -161,8 +161,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 876531637951701254}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36cd8832ee33437789ee862acfef624a, type: 3}
+  m_Script: {fileID: 11500000, guid: 7388150c42866924c8462606e076650f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _connectionSound: {fileID: 8300000, guid: 01dadbfab854bc14d88df1c894017c8b, type: 3}
-  _connection: {fileID: 4513213180785453099}
+  _connectionSound: {fileID: 8300000, guid: eeecb8411b098ea42a2abc9e9c131e1c, type: 3}

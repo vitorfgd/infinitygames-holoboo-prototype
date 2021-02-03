@@ -3,69 +3,69 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public static class MonoBehaviourExtensions
+namespace Extensions
 {
-    public static void AssignComponent<T>(this MonoBehaviour self, out T target)
-    where T : Component
+    /// <summary>
+    /// Created by https://github.com/kroltan
+    /// </summary>
+    public static class MonoBehaviourExtensions
     {
-        target = self.GetComponent<T>();
-    }
+        public static Task AsyncCoroutine(
+            this MonoBehaviour self,
+            IEnumerator coroutine
+        )
+        {
+            return AsyncCoroutine(self, coroutine, CancellationToken.None);
+        }
 
-    public static Task AsyncCoroutine(
-        this MonoBehaviour self,
-        IEnumerator coroutine
-    )
-    {
-        return AsyncCoroutine(self, coroutine, CancellationToken.None);
-    }
+        private static Task AsyncCoroutine(
+            this MonoBehaviour self,
+            IEnumerator coroutine,
+            CancellationToken cancellationToken
+        )
+        {
+            var source = new TaskCompletionSource<object>(
+                TaskCreationOptions.RunContinuationsAsynchronously | TaskCreationOptions.AttachedToParent
+            );
 
-    public static Task AsyncCoroutine(
-        this MonoBehaviour self,
-        IEnumerator coroutine,
-        CancellationToken cancellationToken
-    )
-    {
-        var source = new TaskCompletionSource<object>(
-            TaskCreationOptions.RunContinuationsAsynchronously | TaskCreationOptions.AttachedToParent
-        );
+            var yield = coroutine == null
+                ? null
+                : self.StartCoroutine(coroutine);
 
-        var yield = coroutine == null
-            ? null
-            : self.StartCoroutine(coroutine);
+            var completer = self.StartCoroutine(CompleteAfter(source, yield));
 
-        var completer = self.StartCoroutine(CompleteAfter(source, yield));
-
-        cancellationToken.Register(
-            () =>
-            {
-                if (source.Task.IsCompleted)
+            cancellationToken.Register(
+                () =>
                 {
-                    return;
-                }
-
-                if (self != null)
-                {
-                    if (yield != null)
+                    if (source.Task.IsCompleted)
                     {
-                        self.StopCoroutine(yield);
+                        return;
                     }
 
-                    self.StopCoroutine(completer);
+                    if (self != null)
+                    {
+                        if (yield != null)
+                        {
+                            self.StopCoroutine(yield);
+                        }
+
+                        self.StopCoroutine(completer);
+                    }
+
+                    source.SetCanceled();
                 }
+            );
 
-                source.SetCanceled();
-            }
-        );
+            return source.Task;
+        }
 
-        return source.Task;
-    }
-
-    private static IEnumerator CompleteAfter(
-        TaskCompletionSource<object> source,
-        YieldInstruction instruction
-    )
-    {
-        yield return instruction;
-        source.SetResult(null);
+        private static IEnumerator CompleteAfter(
+            TaskCompletionSource<object> source,
+            YieldInstruction instruction
+        )
+        {
+            yield return instruction;
+            source.SetResult(null);
+        }
     }
 }

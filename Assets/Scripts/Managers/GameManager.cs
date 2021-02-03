@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using DG.Tweening;
+using Extensions;
+using Gameplay;
 using Models;
 using TMPro;
 using UnityEngine;
@@ -11,7 +12,7 @@ using UnityEngine.UI;
 namespace Managers
 {
     /// <summary>
-    /// TODO: Refactor code and split view from logic.
+    /// TODO: Rewrite this class and remove any view in its separate class.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -35,19 +36,21 @@ namespace Managers
 
         [Header("Texts")]
         [SerializeField]
-        private TMP_Text _map;
+        private TMP_Text _current;
 
         [SerializeField]
         private TMP_Text _message;
 
         [Header("Level Configurations")]
         [SerializeField]
-        private string _saveIdentifier;
-
-        [SerializeField]
         private Map[] _maps;
 
-        private int _current;
+        [SerializeField]
+        private AudioClip _successClip;
+
+        private int _currentStage;
+        private int _unlockedStages;
+        private PersistenceHandler _persistenceHandler;
         private readonly List<Node> _connectors = new List<Node>();
 
         protected void Awake()
@@ -60,7 +63,10 @@ namespace Managers
 
         protected void Start()
         {
-            _current = PlayerPrefs.GetInt(_saveIdentifier, 0);
+            _persistenceHandler = PersistenceHandler.Instance;
+            _currentStage = _persistenceHandler.Load(_persistenceHandler.CurrentStagePersistenceKey);
+            _unlockedStages = _persistenceHandler.Load(_persistenceHandler.UnlockedStagesPersistenceKey);
+
             EvaluatePageButtonStatus();
             Create();
         }
@@ -81,15 +87,15 @@ namespace Managers
 
         private void ChangePage(int modifier)
         {
-            _current += modifier;
+            _currentStage += modifier;
             EvaluatePageButtonStatus();
-            Next(_current);
+            Next(_currentStage);
         }
 
         private void EvaluatePageButtonStatus()
         {
-            _previousButton.interactable = _current != 0;
-            _previousButton.interactable = _current < _maps.Length;
+            _previousButton.interactable = _currentStage != 0;
+            _nextButton.interactable = _currentStage < _maps.Length && _currentStage <= _unlockedStages;
         }
 
         private void EvaluateGameStatus()
@@ -99,19 +105,31 @@ namespace Managers
                 return;
             }
 
-            _current += 1;
-            Next(_current);
+            AudioManager.Instance.Play(_successClip, true);
+            _container.transform.DOShakeScale(1f, .1f, 10);
+            _currentStage += 1;
+            Next(_currentStage);
         }
 
+        /// <summary>
+        /// Loads new stage.
+        /// Destroys the current stage.
+        /// Checks whether there are more stages to be played;
+        /// End game or loads new stage depending on the result.
+        /// </summary>
+        /// <param name="map"></param>
         private async void Next(int map)
         {
-            await this.AsyncCoroutine(Destroy());
+            // Extension method that allows me to use an IEnumerator as an async.
+            // Implemented using IEnumerator over Task.Delay because of previous problem regarding multiple threads on different platforms.
+            await this.AsyncCoroutine(Utilities.Wait(1));
+            Destroy();
+            await _mapper.Destroy();
 
             if (_maps.Length == map)
             {
-                _current = 0;
-                PlayerPrefs.SetInt(_saveIdentifier, _current);
-                
+                _currentStage = 0;
+                _persistenceHandler.Save(_persistenceHandler.CurrentStagePersistenceKey, _currentStage);
                 _message.gameObject.SetActive(true);
                 return;
             }
@@ -121,17 +139,22 @@ namespace Managers
 
         private void Create()
         {
-            PlayerPrefs.SetInt(_saveIdentifier, _current);
-            _map.text = $"#{_current + 1}";
-            _mapper.Create(_maps[_current]);
+            _persistenceHandler.Save(_persistenceHandler.CurrentStagePersistenceKey, _currentStage);
+
+            if (_unlockedStages < _currentStage)
+            {
+                _unlockedStages = _currentStage;
+                _persistenceHandler.Save(_persistenceHandler.UnlockedStagesPersistenceKey, _currentStage);
+            }
+
+            _current.text = $"#{_currentStage + 1}";
+            _mapper.Create(_maps[_currentStage]);
         }
 
-        private IEnumerator Destroy()
+        private void Destroy()
         {
-            yield return new WaitForSeconds(1);
             _connectors.Clear();
             _connectionsEvaluator.Reset();
-            _mapper.Destroy();
         }
     }
 }

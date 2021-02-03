@@ -4,9 +4,13 @@ using UnityEngine.UI;
 
 namespace Models
 {
+    /// <summary>
+    /// Every path ends in a Connector
+    /// </summary>
     [RequireComponent(typeof(Image))]
     public class Connector : Node
     {
+        // GameManager subscribes to this event on every connector during stage creation. 
         public UnityEvent ConnectorWasConnected = new UnityEvent();
 
         [SerializeField]
@@ -21,6 +25,7 @@ namespace Models
                 return;
             }
 
+            // Change icon's color when connected to a battery.
             GetComponent<Image>().color = _colorWhenConnected;
             ConnectorWasConnected?.Invoke();
         }
