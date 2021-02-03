@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dacb750dbb874c769c3532fb102f8c62, type: 3}
   m_Name: prototype-map-2
   m_EditorClassIdentifier: 
-  Size: {x: 5, y: 5}
+  Size: {x: 4, y: 4}
   Connectors: 1
+  Nodes: []
